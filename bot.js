@@ -13,7 +13,17 @@ bot.on('message', (message) => {
   const chatId = message.chat.id;
   const video = fs.readFileSync(videoPath);
   bot.sendVideo(chatId, video, {
-    caption:"Doge Aptos Buy!"
+    caption:"🐕🐕 Doge Aptos Buy! 🐕🐕" + 
+            "\n\n" + 
+            "🟢🟢🟢" +
+            "\n\n" +
+            "<b>Spent:</b>" + " " + "$7" + "\n" +
+            "<b>Got:</b>" + " " + "$7" + "\n" + 
+            "<b>Price:</b>" + " " + "$7" + "\n" +
+            "<b>Market cap:</b>" + " " + "$7" +
+            "\n\n" +
+            "<a href=\"https://example.com\">Tx</a>" + " | " + "<a href=\"https://dexscreener.com/aptos/liquidswap-41629\">Chart</a>" + " | " + "<a href=\"https://example.com\">Buyer</a>" + " | " + "<a href=\"https://liquidswap.com/#/\">Buy Now</a>",
+    parse_mode: 'HTML'
   });
 });
 
