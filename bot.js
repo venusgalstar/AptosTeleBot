@@ -3,32 +3,89 @@ const require = createRequire(import.meta.url)
 const TelegramBot = require('node-telegram-bot-api')
 const dotenv = require('dotenv')
 const fs = require('fs');
+const axios = require("axios");
+
+import fetch from "cross-fetch";
 
 dotenv.config()
 const token = process.env.TELEGRAM_BOT_TOKEN
 const bot = new TelegramBot(token, { polling: true })
 const videoPath = './DogeAptos.mp4';
+const video = fs.readFileSync(videoPath);
+let chatId = '';
+let nPrevSequenceNumber = 0;
 
 bot.on('message', (message) => {
-  const chatId = message.chat.id;
-  const video = fs.readFileSync(videoPath);
-  bot.sendVideo(chatId, video, {
-    caption:"🐕🐕 Doge Aptos Buy! 🐕🐕" + 
-            "\n\n" + 
-            "🟢🟢🟢" +
-            "\n\n" +
-            "<b>Spent:</b>" + " " + "$7" + "\n" +
-            "<b>Got:</b>" + " " + "$7" + "\n" + 
-            "<b>Price:</b>" + " " + "$7" + "\n" +
-            "<b>Market cap:</b>" + " " + "$7" +
-            "\n\n" +
-            "<a href=\"https://example.com\">Tx</a>" + " | " + "<a href=\"https://dexscreener.com/aptos/liquidswap-41629\">Chart</a>" + " | " + "<a href=\"https://example.com\">Buyer</a>" + " | " + "<a href=\"https://liquidswap.com/#/\">Buy Now</a>",
-    parse_mode: 'HTML'
-  });
+  chatId = message.chat.id;
 });
 
+const ExecuteFunction = async () => {
+  const url = "https://fullnode.mainnet.aptoslabs.com/v1/accounts/0x05a97986a9d031c4567e15b797be516910cfcb4156312482efc6a19c0a30c948/events/0x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::liquidity_pool::EventsStore%3C0x5c738a5dfa343bee927c39ebe85b0ceb95fdb5ee5b323c95559614f5a77c47cf::Aptoge::Aptoge,%200x1::aptos_coin::AptosCoin,%200x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::curves::Uncorrelated%3E/swap_handle?limit=10";
+  let event_data_res = await fetch(url);
+  let event_data = await event_data_res.json();
+
+  let priceAPT = 0;
+  try {
+    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=aptos&vs_currencies=usd');
+    const price = response.data.aptos.usd;
+    priceAPT = price;
+  } catch (error) {
+    console.error(error);
+  }
+
+  let nCnt = event_data.length;
+  for(let i=nCnt-1;i>=0;i--)
+  {
+    if(event_data[i].sequence_number > nPrevSequenceNumber)
+    {
+      let nAptogeCnt = parseInt(event_data[i].data.x_out)/1000000;
+      let nAptosCnt = parseInt(event_data[i].data.y_in)/100000000;
+      if(nAptogeCnt > 0)
+      {
+        let AptosDisplayPrice = priceAPT * nAptosCnt;
+        let formattedNum = AptosDisplayPrice.toFixed(3);
+        AptosDisplayPrice = parseFloat(formattedNum);
+
+        formattedNum = nAptosCnt.toFixed(2);
+        nAptosCnt = parseFloat(formattedNum);
+
+        let priceAptoge = AptosDisplayPrice/nAptogeCnt;
+        formattedNum = priceAptoge.toFixed(5);
+        priceAptoge = parseFloat(formattedNum);
+
+        formattedNum = nAptogeCnt.toFixed(2);
+        nAptogeCnt = parseFloat(formattedNum);
+
+        let marketCap = priceAptoge * 1000;
+        formattedNum = marketCap.toFixed(2);
+        marketCap = parseFloat(formattedNum);
+
+        bot.sendVideo(chatId, video, {
+          caption:"🐕🐕 Doge Aptos Buy! 🐕🐕" + 
+                  "\n\n" + 
+                  "🟢🟢🟢" +
+                  "\n\n" +
+                  "<b>Spent:</b>" + " $" + AptosDisplayPrice + "(" + nAptosCnt + " APT)\n" +
+                  "<b>Got:</b>" + " " + nAptogeCnt + " APTOGE\n" + 
+                  "<b>Price:</b>" + " $" + priceAptoge + "\n" +
+                  "<b>Market cap:</b>" + " $" + marketCap + "K" +
+                  "\n\n" +
+                  "<a href=\"https://example.com\">Tx</a>" + " | " + "<a href=\"https://dexscreener.com/aptos/liquidswap-41629\">Chart</a>" + " | " + "<a href=\"https://example.com\">Buyer</a>" + " | " + "<a href=\"https://liquidswap.com/#/\">Buy Now</a>",
+          parse_mode: 'HTML'
+        });
+
+      }
+      break;
+    }
+  }
+  nPrevSequenceNumber = event_data[nCnt-1].sequence_number;
+}
 
 if(bot.isPolling()) {
   await bot.stopPolling();
 }
 await bot.startPolling();
+
+var interval = setInterval(function() {
+  ExecuteFunction();
+}, 3000);
