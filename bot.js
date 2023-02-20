@@ -15,8 +15,8 @@ const video = fs.readFileSync(videoPath);
 let chatId = '';
 let nPrevSequenceNumber = 0;
 
-bot.on('message', (message) => {
-  chatId = message.chat.id;
+bot.onText(/\/start/, (msg) => {
+  chatId = msg.chat.id;
 });
 
 const ExecuteFunction = async () => {
@@ -24,13 +24,14 @@ const ExecuteFunction = async () => {
   let event_data_res = await fetch(url);
   let event_data = await event_data_res.json();
 
+  
+
   let priceAPT = 0;
   try {
     const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=aptos&vs_currencies=usd');
     const price = response.data.aptos.usd;
     priceAPT = price;
   } catch (error) {
-    console.error(error);
   }
 
   let nCnt = event_data.length;
@@ -42,6 +43,15 @@ const ExecuteFunction = async () => {
       let nAptosCnt = parseInt(event_data[i].data.y_in)/100000000;
       if(nAptogeCnt > 0)
       {
+        const vVersion = event_data[i].version;
+        const urlTransaction = "https://fullnode.mainnet.aptoslabs.com/v1/transactions/by_version/" + vVersion;
+        let transactionVersion = await fetch(urlTransaction);
+        let getTransaction = await transactionVersion.json();
+        let vTransaction = getTransaction.hash;
+        vTransaction = "https://explorer.aptoslabs.com/txn/" + vTransaction;
+        let vSender = getTransaction.sender;
+        vSender = "https://explorer.aptoslabs.com/account/" + vSender;
+
         let AptosDisplayPrice = priceAPT * nAptosCnt;
         let formattedNum = AptosDisplayPrice.toFixed(3);
         AptosDisplayPrice = parseFloat(formattedNum);
@@ -60,17 +70,24 @@ const ExecuteFunction = async () => {
         formattedNum = marketCap.toFixed(2);
         marketCap = parseFloat(formattedNum);
 
+        let msg = "🐕🐕 Doge Aptos Buy! 🐕🐕" + 
+                  "\n\n";
+        
+        for(let j=0;j<(AptosDisplayPrice/10);j++)
+        {
+          msg += "🟢";
+        }
+
+        msg += "\n\n" +
+            "<b>Spent:</b>" + " $" + AptosDisplayPrice + "(" + nAptosCnt + " APT)\n" +
+            "<b>Got:</b>" + " " + nAptogeCnt + " APTOGE\n" + 
+            "<b>Price:</b>" + " $" + priceAptoge + "\n" +
+            "<b>Market cap:</b>" + " $" + marketCap + "K" +
+            "\n\n" +
+            "<a href=\"" + vTransaction + "\">Tx</a>" + " | " + "<a href=\"https://dexscreener.com/aptos/liquidswap-41629\">Chart</a>" + " | " + "<a href=\"" + vSender + "\">Buyer</a>" + " | " + "<a href=\"https://liquidswap.com/#/\">Buy Now</a>";
+
         bot.sendVideo(chatId, video, {
-          caption:"🐕🐕 Doge Aptos Buy! 🐕🐕" + 
-                  "\n\n" + 
-                  "🟢🟢🟢" +
-                  "\n\n" +
-                  "<b>Spent:</b>" + " $" + AptosDisplayPrice + "(" + nAptosCnt + " APT)\n" +
-                  "<b>Got:</b>" + " " + nAptogeCnt + " APTOGE\n" + 
-                  "<b>Price:</b>" + " $" + priceAptoge + "\n" +
-                  "<b>Market cap:</b>" + " $" + marketCap + "K" +
-                  "\n\n" +
-                  "<a href=\"https://example.com\">Tx</a>" + " | " + "<a href=\"https://dexscreener.com/aptos/liquidswap-41629\">Chart</a>" + " | " + "<a href=\"https://example.com\">Buyer</a>" + " | " + "<a href=\"https://liquidswap.com/#/\">Buy Now</a>",
+          caption:msg,
           parse_mode: 'HTML'
         });
 
