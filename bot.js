@@ -10,8 +10,7 @@ import fetch from "cross-fetch";
 dotenv.config()
 const token = process.env.TELEGRAM_BOT_TOKEN
 const bot = new TelegramBot(token, { polling: true })
-const videoPath = './DogeAptos.mp4';
-const video = fs.readFileSync(videoPath);
+const gifPath = './MauAptos.gif';
 let chatId = '';
 let nPrevSequenceNumber = 0;
 
@@ -20,18 +19,20 @@ bot.onText(/\/start/, (msg) => {
 });
 
 const ExecuteFunction = async () => {
-  const url = "https://fullnode.mainnet.aptoslabs.com/v1/accounts/0x05a97986a9d031c4567e15b797be516910cfcb4156312482efc6a19c0a30c948/events/0x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::liquidity_pool::EventsStore%3C0x5c738a5dfa343bee927c39ebe85b0ceb95fdb5ee5b323c95559614f5a77c47cf::Aptoge::Aptoge,%200x1::aptos_coin::AptosCoin,%200x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::curves::Uncorrelated%3E/swap_handle?limit=10";
+  const url = "https://fullnode.mainnet.aptoslabs.com/v1/accounts/0x05a97986a9d031c4567e15b797be516910cfcb4156312482efc6a19c0a30c948/events/0x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::liquidity_pool::EventsStore%3C0xf8fa55ff4265fa9586f74d00da4858b8a0d2320bbe94cb0e91bf3a40773eb60::MAU::MAU,%200x1::aptos_coin::AptosCoin,%200x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::curves::Uncorrelated%3E/swap_handle?limit=10";
   let event_data_res = await fetch(url);
   let event_data = await event_data_res.json();
 
-  
-
   let priceAPT = 0;
-  try {
-    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=aptos&vs_currencies=usd');
-    const price = response.data.aptos.usd;
-    priceAPT = price;
-  } catch (error) {
+  while(priceAPT == 0)
+  {
+    try {
+      const response = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=aptos&vs_currencies=usd');
+      const price = response.data.aptos.usd;
+      priceAPT = price;
+    }
+    catch (error) {
+    }
   }
 
   let nCnt = event_data.length;
@@ -60,33 +61,33 @@ const ExecuteFunction = async () => {
         nAptosCnt = parseFloat(formattedNum);
 
         let priceAptoge = AptosDisplayPrice/nAptogeCnt;
-        formattedNum = priceAptoge.toFixed(5);
+        formattedNum = priceAptoge.toFixed(7);
         priceAptoge = parseFloat(formattedNum);
 
         formattedNum = nAptogeCnt.toFixed(2);
         nAptogeCnt = parseFloat(formattedNum);
 
-        let marketCap = priceAptoge * 1000;
+        let marketCap = priceAptoge * 1000000;
         formattedNum = marketCap.toFixed(2);
         marketCap = parseFloat(formattedNum);
 
-        let msg = "🐕🐕 Doge Aptos Buy! 🐕🐕" + 
+        let msg = "🐕🐕 MAU Aptos Buy! 🐕🐕" + 
                   "\n\n";
         
         for(let j=0;j<(AptosDisplayPrice/10);j++)
         {
-          msg += "🟢";
+          msg += "🐈‍";
         }
 
         msg += "\n\n" +
             "<b>Spent:</b>" + " $" + AptosDisplayPrice + "(" + nAptosCnt + " APT)\n" +
-            "<b>Got:</b>" + " " + nAptogeCnt + " APTOGE\n" + 
+            "<b>Got:</b>" + " " + nAptogeCnt + " MAU\n" + 
             "<b>Price:</b>" + " $" + priceAptoge + "\n" +
             "<b>Market cap:</b>" + " $" + marketCap + "K" +
             "\n\n" +
             "<a href=\"" + vTransaction + "\">Tx</a>" + " | " + "<a href=\"https://dexscreener.com/aptos/liquidswap-41629\">Chart</a>" + " | " + "<a href=\"" + vSender + "\">Buyer</a>" + " | " + "<a href=\"https://liquidswap.com/#/\">Buy Now</a>";
 
-        bot.sendVideo(chatId, video, {
+        bot.sendAnimation(chatId, gifPath, {
           caption:msg,
           parse_mode: 'HTML'
         });
@@ -105,4 +106,4 @@ await bot.startPolling();
 
 var interval = setInterval(function() {
   ExecuteFunction();
-}, 3000);
+}, 10000);
