@@ -10,16 +10,17 @@ import fetch from "cross-fetch";
 dotenv.config()
 const token = process.env.TELEGRAM_BOT_TOKEN
 const bot = new TelegramBot(token, { polling: true })
-const gifPath = './MauAptos.gif';
+const gifPath = './MauAptos.mp4';
+const profilePath = './MauProfile.jpg';
 let chatId = '';
 let nPrevSequenceNumber = 0;
 
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/mau/, (msg) => {
   chatId = msg.chat.id;
 });
 
 const ExecuteFunction = async () => {
-  const url = "https://fullnode.mainnet.aptoslabs.com/v1/accounts/0x05a97986a9d031c4567e15b797be516910cfcb4156312482efc6a19c0a30c948/events/0x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::liquidity_pool::EventsStore%3C0xf8fa55ff4265fa9586f74d00da4858b8a0d2320bbe94cb0e91bf3a40773eb60::MAU::MAU,%200x1::aptos_coin::AptosCoin,%200x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::curves::Uncorrelated%3E/swap_handle?limit=10";
+  const url = "https://fullnode.mainnet.aptoslabs.com/v1/accounts/0x05a97986a9d031c4567e15b797be516910cfcb4156312482efc6a19c0a30c948/events/0x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::liquidity_pool::EventsStore%3C0xf8fa55ff4265fa9586f74d00da4858b8a0d2320bbe94cb0e91bf3a40773eb60::MAU::MAU,%200x1::aptos_coin::AptosCoin,%200x190d44266241744264b964a37b8f09863167a12d3e70cda39376cfb4e3561e12::curves::Uncorrelated%3E/swap_handle?limit=100";
   let event_data_res = await fetch(url);
   let event_data = await event_data_res.json();
 
@@ -71,7 +72,7 @@ const ExecuteFunction = async () => {
         formattedNum = marketCap.toFixed(2);
         marketCap = parseFloat(formattedNum);
 
-        let msg = "🐕🐕 MAU Aptos Buy! 🐕🐕" + 
+        let msg = "🐈🐈 MAU Aptos Buy! 🐈🐈" + 
                   "\n\n";
         
         for(let j=0;j<(AptosDisplayPrice/10);j++)
@@ -87,7 +88,7 @@ const ExecuteFunction = async () => {
             "\n\n" +
             "<a href=\"" + vTransaction + "\">Tx</a>" + " | " + "<a href=\"https://dexscreener.com/aptos/liquidswap-41629\">Chart</a>" + " | " + "<a href=\"" + vSender + "\">Buyer</a>" + " | " + "<a href=\"https://liquidswap.com/#/\">Buy Now</a>";
 
-        bot.sendAnimation(chatId, gifPath, {
+        bot.sendVideo(chatId, gifPath, {
           caption:msg,
           parse_mode: 'HTML'
         });
