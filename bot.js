@@ -11,9 +11,9 @@ dotenv.config()
 const token = process.env.TELEGRAM_BOT_TOKEN
 const bot = new TelegramBot(token, { polling: true })
 const gifPath = './MauAptos.mp4';
-const profilePath = './MauProfile.jpg';
 let chatId = '';
 let nPrevSequenceNumber = 0;
+let bBotStart = false;
 
 bot.onText(/\/mau/, (msg) => {
   chatId = msg.chat.id;
@@ -72,12 +72,12 @@ const ExecuteFunction = async () => {
         formattedNum = marketCap.toFixed(2);
         marketCap = parseFloat(formattedNum);
 
-        let msg = "🐈🐈 MAU Aptos Buy! 🐈🐈" + 
+        let msg = "🐈‍⬛🐈‍⬛ MAU Aptos Buy! 🐈‍⬛🐈‍⬛" + 
                   "\n\n";
         
         for(let j=0;j<(AptosDisplayPrice/10);j++)
         {
-          msg += "🐈‍";
+          msg += "🐈‍⬛";
         }
 
         msg += "\n\n" +
@@ -93,7 +93,15 @@ const ExecuteFunction = async () => {
           parse_mode: 'HTML'
         });
 
+        if(bBotStart == false)
+        {
+          bBotStart = true;
+          break;
+        }
       }
+    }
+    else
+    {
       break;
     }
   }
