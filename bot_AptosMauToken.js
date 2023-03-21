@@ -20,7 +20,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms))
 // });
 
 const ExecuteFunction = async () => {
-  const url = "https://fullnode.mainnet.aptoslabs.com/v1/accounts/0x2ad8f7e64c7bffcfe94d7dea84c79380942c30e13f1b12c7a89e98df91d0599b/events/0x2ad8f7e64c7bffcfe94d7dea84c79380942c30e13f1b12c7a89e98df91d0599b::swap::PairEventHolder%3C0x1::aptos_coin::AptosCoin,0xf8fa55ff4265fa9586f74d00da4858b8a0d2320bbe94cb0e91bf3a40773eb60::MAU::MAU%3E/swap?limit=100";
+  const url = "https://fullnode.mainnet.aptoslabs.com/v1/accounts/0x2ad8f7e64c7bffcfe94d7dea84c79380942c30e13f1b12c7a89e98df91d0599b/events/0x2ad8f7e64c7bffcfe94d7dea84c79380942c30e13f1b12c7a89e98df91d0599b::swap::PairEventHolder%3C0x1::aptos_coin::AptosCoin,0xf8fa55ff4265fa9586f74d00da4858b8a0d2320bbe94cb0e91bf3a40773eb60::MAU::MAU%3E/swap?limit=5";
   let event_data_res = await fetch(url);
   let event_data = await event_data_res.json();
 
